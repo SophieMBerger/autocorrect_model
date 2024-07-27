@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Request
+import logging
+import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from transformers import TFMobileBertForMaskedLM, AutoTokenizer
@@ -12,6 +14,10 @@ class TextRequest(BaseModel):
 
 # Initialize FastAPI
 app = FastAPI(docs_url="/docs")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer from the local directory
 model = TFMobileBertForMaskedLM.from_pretrained("google/mobilebert-uncased")
@@ -62,3 +68,15 @@ async def predict(request: TextRequest):
             best_token = token
     
     return {"best_token": best_token}
+
+# Middleware to log requests and responses with latency
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    end_time = time.time()
+    duration = end_time - start_time
+    logger.info(f"Completed request with status: {response.status_code} in {duration:.4f} seconds")
+    response.headers["X-Process-Time"] = str(duration)
+    return response
