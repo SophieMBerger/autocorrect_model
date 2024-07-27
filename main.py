@@ -39,8 +39,16 @@ async def predict(request: TextRequest):
     # Tokenize and get predictions
     inputs = tokenizer(input_text, return_tensors="tf")
     outputs = model(**inputs)
-    predictions = tf.argmax(outputs.logits, axis=-1)
-    predicted_tokens = tokenizer.convert_ids_to_tokens(predictions[0].numpy())
+
+    # Identify the position of the [MASK] token
+    mask_token_index = tf.where(inputs["input_ids"] == tokenizer.mask_token_id)[0, 1].numpy()
+    
+    # Get the top 10 predictions for the [MASK] token position
+    top_k = 10
+    mask_token_logits = outputs.logits[0, mask_token_index]
+    top_k_predictions = tf.math.top_k(mask_token_logits, k=top_k)
+    
+    predicted_tokens = [tokenizer.convert_ids_to_tokens([token_id.numpy()])[0] for token_id in top_k_predictions.indices]
 
     print(predicted_tokens)
     
