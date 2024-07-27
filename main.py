@@ -50,7 +50,7 @@ async def predict(request: TextRequest):
     mask_token_index = tf.where(inputs["input_ids"] == tokenizer.mask_token_id)[0, 1].numpy()
     
     # Get the top_k predictions for the [MASK] token position
-    top_k = 100
+    top_k = 10
     mask_token_logits = outputs.logits[0, mask_token_index]
     top_k_predictions = tf.math.top_k(mask_token_logits, k=top_k)
     
