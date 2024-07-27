@@ -11,11 +11,9 @@ class TextRequest(BaseModel):
 # Initialize FastAPI
 app = FastAPI(docs_url="/docs")
 
-@app.on_event("startup")
-def init_fast_api():
-    # Load the model and tokenizer from the local directory
-    model = TFAutoModelForMaskedLM.from_pretrained("google/mobilebert-uncased")
-    tokenizer = AutoTokenizer.from_pretrained("google/mobilebert-uncased")
+# Load the model and tokenizer from the local directory
+model = TFAutoModelForMaskedLM.from_pretrained("google/mobilebert-uncased")
+tokenizer = AutoTokenizer.from_pretrained("google/mobilebert-uncased")
 
 @app.get("/")
 async def root():
