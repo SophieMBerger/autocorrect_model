@@ -41,6 +41,8 @@ async def predict(request: TextRequest):
     outputs = model(**inputs)
     predictions = tf.argmax(outputs.logits, axis=-1)
     predicted_tokens = tokenizer.convert_ids_to_tokens(predictions[0].numpy())
+
+    print(predicted_tokens)
     
     # Find the token with the lowest Levenshtein distance to the misspelled word
     min_distance = float('inf')
