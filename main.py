@@ -53,7 +53,7 @@ async def predict(request: TextRequest):
     print(predicted_tokens)
     
     # Find the token with the lowest Levenshtein distance to the misspelled word
-    min_distance = float('inf')
+    min_distance = float(10)
     best_token = None
     for token in predicted_tokens:
         distance = Levenshtein.distance(misspelled_word, token)
