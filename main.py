@@ -1,5 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+from transformers import TFAutoModelForMaskedLM, AutoTokenizer
+import tensorflow as tf
 
 # Define the request body schema
 class TextRequest(BaseModel):
