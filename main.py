@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import TFAutoModelForMaskedLM, AutoTokenizer
+from transformers import TFMobileBertForMaskedLM, AutoTokenizer
 import tensorflow as tf
 import Levenshtein
 
@@ -14,7 +14,7 @@ class TextRequest(BaseModel):
 app = FastAPI(docs_url="/docs")
 
 # Load the model and tokenizer from the local directory
-model = TFAutoModelForMaskedLM.from_pretrained("google/mobilebert-uncased")
+model = TFMobileBertForMaskedLM.from_pretrained("google/mobilebert-uncased")
 tokenizer = AutoTokenizer.from_pretrained("google/mobilebert-uncased")
 
 @app.get("/")
