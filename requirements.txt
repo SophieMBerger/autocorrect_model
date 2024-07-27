@@ -3,3 +3,4 @@ uvicorn
 tf-keras
 tensorflow
 transformers
+python-Levenshtein
