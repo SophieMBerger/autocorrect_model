@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from transformers import TFAutoModelForMaskedLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import numpy as np
+import Levenshtein
 
 # Define the request body schema
 class TextRequest(BaseModel):
