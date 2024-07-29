@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
 model_name = "microsoft/MiniLM-L12-H384-uncased"
-model = TFElectraForMaskedLM.from_pretrained(model_name)
+model = AutoModelForMaskedLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 @app.get("/")
