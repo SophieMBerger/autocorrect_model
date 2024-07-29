@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
-model_name = "microsoft/MiniLM-L12-H384-uncased"
+model_name = "squeezebert/squeezebert-uncased"
 model = TFAutoModelForMaskedLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
