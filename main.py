@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
-model_name = "distilbert-base-uncased"  # Change to a smaller model
+model_name = "huawei-noah/TinyBERT_General_4L_312D"  # Change to a smaller model
 model = TFAutoModelForMaskedLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
