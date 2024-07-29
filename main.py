@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
 model_name = "distilgpt2"
-model = TFAutoModelForMaskedLM.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 @app.get("/")
