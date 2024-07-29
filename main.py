@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from transformers import TFMobileBertForMaskedLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
-import Levenshtein
+import numpy as np
 
 # Define the request body schema
 class TextRequest(BaseModel):
