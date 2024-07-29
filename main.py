@@ -3,7 +3,7 @@ import logging
 import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import AlbertForMaskedLM, AutoTokenizer, TFAutoModel
+from transformers import TFAlbertForMaskedLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import numpy as np
 import Levenshtein
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
 model_name = "albert-base-v2"  # Change to a smaller model
-model = AlbertForMaskedLM.from_pretrained(model_name)
+model = TFAlbertForMaskedLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 @app.get("/")
