@@ -57,9 +57,7 @@ async def predict(request: TextRequest):
     top_k_predictions = tf.math.top_k(mask_token_logits, k=top_k)
 
     predicted_tokens = [tokenizer.convert_ids_to_tokens([token_id.numpy()])[0] for token_id in top_k_predictions.indices]
-
-    # Compute the embedding for the misspelled word
-    misspelled_inputs = tokenizer(misspelled_word, return_tensors="tf")
+    print(predicted_tokens)
 
     # Find the token with the lowest Levenshtein distance to the misspelled word
     min_distance = float(10)
