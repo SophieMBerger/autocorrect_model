@@ -3,7 +3,7 @@ import logging
 import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import AutoModelForCausalLM, AutoTokenizer, TFAutoModel
+from transformers import TFAutoModelForCausalLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import numpy as np
 import Levenshtein
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
 model_name = "distilgpt2"
-model = AutoModelForCausalLM.from_pretrained(model_name)
+model = TFAutoModelForCausalLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 @app.get("/")
