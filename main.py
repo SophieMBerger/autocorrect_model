@@ -3,7 +3,7 @@ import logging
 import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import TFAutoModelForMaskedLM, AutoTokenizer, TFAutoModel
+from transformers import AutoModelForCausalLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import numpy as np
 import Levenshtein
