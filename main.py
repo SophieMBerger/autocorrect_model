@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 import logging
 import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import TFMobileBertForMaskedLM, AutoTokenizer
+from transformers import TFAutoModelForMaskedLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
-import Levenshtein
+import numpy as np
 
 # Define the request body schema
 class TextRequest(BaseModel):
@@ -19,9 +19,10 @@ app = FastAPI(docs_url="/docs")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load the model and tokenizer from the local directory
-model = TFMobileBertForMaskedLM.from_pretrained("google/mobilebert-uncased")
-tokenizer = AutoTokenizer.from_pretrained("google/mobilebert-uncased")
+# Load the model and tokenizer once at startup
+model_name = "distilbert-base-uncased"  # Change to a smaller model
+model = TFAutoModelForMaskedLM.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 @app.get("/")
 async def root():
@@ -41,23 +42,25 @@ async def root():
 async def predict(request: TextRequest):
     input_text = request.text
     misspelled_word = request.misspelledWord
-    
+
     # Tokenize and get predictions
     inputs = tokenizer(input_text, return_tensors="tf")
     outputs = model(**inputs)
 
     # Identify the position of the [MASK] token
     mask_token_index = tf.where(inputs["input_ids"] == tokenizer.mask_token_id)[0, 1].numpy()
-    
+
     # Get the top_k predictions for the [MASK] token position
     top_k = 100
     mask_token_logits = outputs.logits[0, mask_token_index]
     top_k_predictions = tf.math.top_k(mask_token_logits, k=top_k)
-    
+
     predicted_tokens = [tokenizer.convert_ids_to_tokens([token_id.numpy()])[0] for token_id in top_k_predictions.indices]
 
-    print(predicted_tokens)
-    
+    # Compute the embedding for the misspelled word
+    misspelled_inputs = tokenizer(misspelled_word, return_tensors="tf")
+    misspelled_embedding = embedding_model(**misspelled_inputs).last_hidden_state[0, 0, :].numpy()
+
     # Find the token with the lowest Levenshtein distance to the misspelled word
     min_distance = float(10)
     best_token = None
@@ -66,7 +69,7 @@ async def predict(request: TextRequest):
         if distance < min_distance:
             min_distance = distance
             best_token = token
-    
+
     return {"best_token": best_token}
 
 # Middleware to log requests and responses with latency
