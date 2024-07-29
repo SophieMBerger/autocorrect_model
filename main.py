@@ -3,7 +3,7 @@ import logging
 import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import TFAutoModelForCausalLM, AutoTokenizer, TFAutoModel
+from transformers import TFElectraForMaskedLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import numpy as np
 import Levenshtein
@@ -21,8 +21,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load the model and tokenizer once at startup
-model_name = "distilgpt2"
-model = TFAutoModelForCausalLM.from_pretrained(model_name)
+model_name = "google/electra-small-generator"  # Change to a smaller model
+model = TFElectraForMaskedLM.from_pretrained(model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 @app.get("/")
