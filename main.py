@@ -3,7 +3,7 @@ import logging
 import time
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from transformers import TFMobileBertForMaskedLM, AutoTokenizer
+from transformers import TFMobileBertForMaskedLM, AutoTokenizer, TFAutoModel
 import tensorflow as tf
 import Levenshtein
 
@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 # Load the model and tokenizer from the local directory
 model = TFMobileBertForMaskedLM.from_pretrained("google/mobilebert-uncased")
 tokenizer = AutoTokenizer.from_pretrained("google/mobilebert-uncased")
+embedding_model = TFAutoModel.from_pretrained("google/mobilebert-uncased")
+
 
 @app.get("/")
 async def root():
@@ -37,12 +39,8 @@ async def root():
     """
     return HTMLResponse(content=html_content, status_code=200)
 
-def jaccard_similarity(str1, str2):
-    set1 = set(str1)
-    set2 = set(str2)
-    intersection = len(set1.intersection(set2))
-    union = len(set1.union(set2))
-    return intersection / union if union != 0 else 0
+def cosine_similarity(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 @app.post("/predict")
 async def predict(request: TextRequest):
@@ -63,13 +61,17 @@ async def predict(request: TextRequest):
 
     predicted_tokens = [tokenizer.convert_ids_to_tokens([token_id.numpy()])[0] for token_id in top_k_predictions.indices]
 
-    print(predicted_tokens)
+    # Compute the embedding for the misspelled word
+    misspelled_inputs = tokenizer(misspelled_word, return_tensors="tf")
+    misspelled_embedding = embedding_model(**misspelled_inputs).last_hidden_state[0, 0, :].numpy()
 
-    # Find the token with the highest Jaccard similarity to the misspelled word
-    max_similarity = 0
+    # Find the token with the highest cosine similarity to the misspelled word
+    max_similarity = -1
     best_token = None
     for token in predicted_tokens:
-        similarity = jaccard_similarity(misspelled_word, token)
+        token_inputs = tokenizer(token, return_tensors="tf")
+        token_embedding = embedding_model(**token_inputs).last_hidden_state[0, 0, :].numpy()
+        similarity = cosine_similarity(misspelled_embedding, token_embedding)
         if similarity > max_similarity:
             max_similarity = similarity
             best_token = token
