@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from transformers import TFMobileBertForMaskedLM, AutoTokenizer
 import tensorflow as tf
+import Levenshtein
 
 # Define the request body schema
 class TextRequest(BaseModel):
@@ -36,43 +37,36 @@ async def root():
     """
     return HTMLResponse(content=html_content, status_code=200)
 
-def jaccard_similarity(str1, str2):
-    set1 = set(str1)
-    set2 = set(str2)
-    intersection = len(set1.intersection(set2))
-    union = len(set1.union(set2))
-    return intersection / union if union != 0 else 0
-
 @app.post("/predict")
 async def predict(request: TextRequest):
     input_text = request.text
     misspelled_word = request.misspelledWord
-
+    
     # Tokenize and get predictions
     inputs = tokenizer(input_text, return_tensors="tf")
     outputs = model(**inputs)
 
     # Identify the position of the [MASK] token
     mask_token_index = tf.where(inputs["input_ids"] == tokenizer.mask_token_id)[0, 1].numpy()
-
+    
     # Get the top_k predictions for the [MASK] token position
     top_k = 100
     mask_token_logits = outputs.logits[0, mask_token_index]
     top_k_predictions = tf.math.top_k(mask_token_logits, k=top_k)
-
+    
     predicted_tokens = [tokenizer.convert_ids_to_tokens([token_id.numpy()])[0] for token_id in top_k_predictions.indices]
 
     print(predicted_tokens)
-
-    # Find the token with the highest Jaccard similarity to the misspelled word
-    max_similarity = 0
+    
+    # Find the token with the lowest Levenshtein distance to the misspelled word
+    min_distance = float(10)
     best_token = None
     for token in predicted_tokens:
-        similarity = jaccard_similarity(misspelled_word, token)
-        if similarity > max_similarity:
-            max_similarity = similarity
+        distance = Levenshtein.distance(misspelled_word, token)
+        if distance < min_distance:
+            min_distance = distance
             best_token = token
-
+    
     return {"best_token": best_token}
 
 # Middleware to log requests and responses with latency
